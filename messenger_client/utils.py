@@ -4,8 +4,12 @@ import struct
 import argparse
 import csv
 import os
+import random
+import string
+import subprocess
 
 Connection = namedtuple('Connection', ('hosts', 'ports'))
+tmp_root = '/tmp/messenger-tmp'
 
 
 class Argument:
@@ -39,6 +43,10 @@ class Argument:
         parser.add_argument('--count_running', '-R', action='store_true', help='return the number of running jobs')
         parser.add_argument('--last_queue_id', '-q', action='store_true', help='show the job ID of the last added.')
         parser.add_argument('--gpus', '-G', type=int, help='number of GPUs required by the job (1 default).')
+        parser.add_argument('--sync', type=str, help='whether to sync the selected working directory to'
+                                                     'a temp directory before executing the command.')
+        parser.add_argument('--excludes', type=str, default=[], help='exception patterns '
+                                                                     'when moving files to server.')
 
         parser.add_argument('-K', action='store_true', help='kill the task spooler server')
         parser.add_argument('-C', action='store_true', help='clear the list of finished jobs')
@@ -56,7 +64,8 @@ class Argument:
         parser.add_argument('-T', action='store_true', help='send SIGTERM to all running job groups.')
         parser.add_argument('-u', type=int, help='put that job first. The last added, if not specified.')
         parser.add_argument('-U', type=str, help='swap two jobs in the queue.')
-        parser.add_argument('-B', action='store_true', help='in case of full queue on the server, quit (2) instead of waiting.')
+        parser.add_argument('-B', action='store_true', help='in case of full queue on the server, '
+                                                            'quit (2) instead of waiting.')
         parser.add_argument('-V', action='store_true', help='show the program version')
 
         parser.add_argument('-n', help='don\'t store the output of the command.')
@@ -68,7 +77,7 @@ class Argument:
         parser.add_argument('-D', type=int, help='the job will be run after the job of given id ends.')
         parser.add_argument('-L', type=str, help='name this task with a label, to be distinguished on listing.')
         parser.add_argument('-N', type=int, help='number of slots required by the job (1 default).')
-        self.args = parser.parse_intermixed_args(self.argv)
+        self.args, _ = parser.parse_known_intermixed_args(self.argv)
 
 
 class MessengerClient:
@@ -107,6 +116,17 @@ class MessengerClient:
 
         return host_choice
 
+    def sync(self, host):
+        tmpdir = os.path.join(tmp_root, 'tmp-')
+        tmpdir += ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+
+        cmd = ['rsync', '-vuar', self.arg.args.sync, f'{host}:{tmpdir}']
+        excludes = self.arg.args.excludes.split(',')
+        exclude = [f'--exclude={exclude}' for exclude in excludes]
+        cmd += exclude
+        subprocess.call(cmd)  # sync using rsync
+        return tmpdir
+
     def exec(self):
         if self.arg.args.auto_server:
             assert self.arg.args.gpus is not None, 'auto_server requires process to run with GPU.'
@@ -114,6 +134,14 @@ class MessengerClient:
         choice = self.choose_server() if self.arg.args.auto_server else self.arg.args.host
         host = self.conn.hosts[choice]
         port = self.conn.ports[choice]
+        if self.arg.args.sync is not None:
+            assert self.arg.args.cd is None, '--sync overrides --cd.'
+            tmpdir = self.sync(host)
+
+            # change directory to the temp dir
+            self.arg.argv.insert(1, tmpdir)
+            self.arg.argv.insert(1, '--cd')
+
         self.socket.connect((host, port))
         self.socket.send(struct.pack('!i', len(self.arg.argv)))
         for i in range(len(self.arg.argv)):
