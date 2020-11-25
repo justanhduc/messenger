@@ -227,3 +227,9 @@ cython_debug/
 *.out
 *.app
 
+.idea/.gitignore
+.idea/inspectionProfiles/
+.idea/messenger_client.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
