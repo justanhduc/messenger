@@ -92,9 +92,6 @@ class MessengerClient:
         self.conn = Connection(rows[0], rows[1])
         self.arg = Argument(argv)
         self.socket = socket.socket()
-        if self.arg.args.c is None and self.arg.args.t is None and \
-                not self.arg.args.num_free_gpus and not self.arg.args.show_free_gpus:
-            self.socket.settimeout(.1)
 
     def choose_server(self):
         cmd = ['ms', '--num_free_gpus']
@@ -143,17 +140,28 @@ class MessengerClient:
             self.arg.argv.insert(1, '--cd')
 
         self.socket.connect((host, port))
+        print(f'Connected to {host}:{port}')
         self.socket.send(struct.pack('!i', len(self.arg.argv)))
         for i in range(len(self.arg.argv)):
             self.socket.send(struct.pack('!i', len(self.arg.argv[i])))
             self.socket.sendall(self.arg.argv[i].encode('utf8'))
 
         # receive data from the server
-        while True:
+        if self.arg.args.c is None \
+                and self.arg.args.t is None \
+                and not self.arg.args.num_free_gpus \
+                and not self.arg.args.show_free_gpus \
+                and len(self.arg.argv) > 1 \
+                and not self.arg.args.l:
             data = self.socket.recv(1024)
-            if not data:
-                break
+            if data:
+                print(data.decode())
+        else:
+            while True:
+                data = self.socket.recv(1024)
+                if not data:
+                    break
 
-            print(data.decode())
+                print(data.decode())
 
         self.socket.close()
