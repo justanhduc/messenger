@@ -3,23 +3,48 @@
 //
 
 #include "gpu.h"
+#include "logging.h"
 
 #include <iomanip>
-#include <cuda_runtime_api.h>
+#include <nvml.h>
 
 ints getFreeGpuList() {
     ints gpuList;
     int nDevices;
-    cudaGetDeviceCount(&nDevices);
-    for (int i = 0; i < nDevices; ++i) {
-        cudaSetDevice(i);
-        size_t freeMem;
-        size_t totalMem;
-        cudaMemGetInfo(&freeMem, &totalMem);
-        if (freeMem > .9 * totalMem)
+    nvmlReturn_t result;
+
+    result = nvmlInit_v2();
+    if (NVML_SUCCESS != result)
+        logging.log("Failed to initialize NVML: %s", nvmlErrorString(result));
+
+    result = nvmlDeviceGetCount_v2(reinterpret_cast<unsigned int *>(&nDevices));
+    if (NVML_SUCCESS != result)
+        logging.log("Failed to get device count: %s", nvmlErrorString(result));
+    for (size_t i = 0; i < nDevices; ++i) {
+        nvmlMemory_t mem;
+        nvmlDevice_t dev;
+        result = nvmlDeviceGetHandleByIndex_v2(i, &dev);
+        if (result != 0) {
+            logging.log("Failed to get GPU handle for GPU %d: %s", i, nvmlErrorString(result));
+            goto Error;
+        }
+
+        result = nvmlDeviceGetMemoryInfo(dev, &mem);
+        if (result != 0) {
+            logging.log("Failed to get GPU memory for GPU %d: %s", i, nvmlErrorString(result));
+            goto Error;
+        }
+        if (mem.free > .9 * mem.total)
             gpuList.push_back(i);
     }
     return gpuList;
+
+    Error:
+    result = nvmlShutdown();
+    if (NVML_SUCCESS != result)
+        logging.log("Failed to shutdown NVML: %s", nvmlErrorString(result));
+
+    return ints();
 }
 
 ints selectFreeGpus(int n) {
@@ -37,22 +62,49 @@ ints selectFreeGpus(int n) {
 
 void showFreeGpuInfo() {
     int nDevices;
-    size_t freeMem;
-    size_t totalMem;
-    cudaGetDeviceCount(&nDevices);
+    nvmlReturn_t result;
+
+    result = nvmlInit_v2();
+    if (NVML_SUCCESS != result)
+        logging.log("Failed to initialize NVML: %s", nvmlErrorString(result));
+
+    result = nvmlDeviceGetCount_v2(reinterpret_cast<unsigned int *>(&nDevices));
+    if (NVML_SUCCESS != result)
+        logging.log("Failed to get device count: %s", nvmlErrorString(result));
+
     ints freeGpuList = getFreeGpuList();
     std::cout << "Device" << std::setw(7) << "Name" <<
               std::setw(35) << "Total Memory (GB)" << std::setw(20)
               << "Free Memory (GB)" << std::endl;
     for (auto it : freeGpuList) {
-        cudaDeviceProp prop{};
-        cudaSetDevice(it);
-        cudaMemGetInfo(&freeMem, &totalMem);
-        cudaGetDeviceProperties(&prop, it);
-        std::cout << it << std::setw(24) << prop.name <<
-                  std::setw(13) << totalMem / (1024. * 1024) <<
-                  std::setw(21) << freeMem / (1024. * 1024) << std::endl;
+        nvmlMemory_t mem;
+        nvmlDevice_t dev;
+        char name[NVML_DEVICE_NAME_BUFFER_SIZE];
+        result = nvmlDeviceGetHandleByIndex_v2(it, &dev);
+        if (result != 0) {
+            logging.log("Failed to get GPU handle for GPU %d: %s", it, nvmlErrorString(result));
+            goto Error;
+        }
+
+        result = nvmlDeviceGetMemoryInfo(dev, &mem);
+        if (result != 0) {
+            logging.log("Failed to get GPU memory for GPU %d: %s", it, nvmlErrorString(result));
+            goto Error;
+        }
+        result = nvmlDeviceGetName(dev, name, NVML_DEVICE_NAME_BUFFER_SIZE);
+        if (result != 0) {
+            logging.log("Failed to get name of device %u: %s\n", it, nvmlErrorString(result));
+            goto Error;
+        }
+        std::cout << it << std::setw(24) << name <<
+                  std::setw(13) << mem.total / (1024. * 1024 * 1024) <<
+                  std::setw(21) << mem.free / (1024. * 1024 * 1024) << std::endl;
     }
+
+    Error:
+    result = nvmlShutdown();
+    if (NVML_SUCCESS != result)
+        logging.log("Failed to shutdown NVML: %s", nvmlErrorString(result));
 }
 
 std::string getCudaVisibleFlag(int n) {
