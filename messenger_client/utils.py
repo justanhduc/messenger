@@ -16,68 +16,77 @@ class Argument:
     def __init__(self, argv):
         self.argv = list(argv)
         self.args = None
+        self.cmd = None
         self.parse_arguments()
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(prog='Messenger',
                                          description='Messenger - A multi-server plugin for Task Spooler')
-        parser.add_argument('cmd', nargs='+', type=str, help='task spooler options')
-        parser.add_argument('--cd', type=str, help='change directory. '
-                                                   'For e.g., ``ms --cd /home/justanhduc/Documents``.')
-        parser.add_argument('--env', type=str, help='set an environment variable flag. '
-                                                    'For e.g., ``ms --cd CUDA_VISIBLE_DEVICES=0``.')
-        parser.add_argument('--host', type=int, default=0, help='host to select. Value corresponds to the order '
-                                                                'specified in the \".hosts_ports\" file.')
+        parser.add_argument('cmd', metavar='command', type=str, help='job to be run')
+        parser.add_argument('--cd', metavar='directory', type=str,
+                            help='change directory. For e.g., ``ms --cd /home/justanhduc/Documents``.')
+        parser.add_argument('--env', metavar='FLAG=VALUE', type=str,
+                            help='set an environment variable flag. For e.g., ``ms --env CUDA_VISIBLE_DEVICES=0``.')
+        parser.add_argument('--host', metavar='host_num', type=int, default=0,
+                            help='host to select. Value corresponds to the order '
+                                 'specified in the \".hosts_ports\" file.')
         parser.add_argument('--show_free_gpus', action='store_true', help='show current available GPUs info.')
         parser.add_argument('--num_free_gpus', action='store_true', help='show the number of available GPUs.')
         parser.add_argument('--auto_server', action='store_true', help='auto-magically choose a server based on '
                                                                        'the number of available GPUs.')
         parser.add_argument('--kill', action='store_true', help='kill Messenger server.')
 
-        parser.add_argument('--set_gpu_wait', type=int, help='set time to wait before running the next GPU job '
-                                                             '(30 seconds by default)')
+        parser.add_argument('--set_gpu_wait', metavar='seconds', type=int,
+                            help='set time to wait before running the next GPU job (30 seconds by default)')
         parser.add_argument('--get_gpu_wait', action='store_true',
                             help='get time to wait before running the next GPU job.')
         parser.add_argument('--get_label', '-a', action='store_true',
                             help='show the job label. Of the last added, if not specified.')
         parser.add_argument('--count_running', '-R', action='store_true', help='return the number of running jobs')
         parser.add_argument('--last_queue_id', '-q', action='store_true', help='show the job ID of the last added.')
-        parser.add_argument('--gpus', '-G', type=int, help='number of GPUs required by the job (1 default).')
-        parser.add_argument('--sync', type=str, help='whether to sync the selected working directory to'
-                                                     'a temp directory before executing the command.')
-        parser.add_argument('--excludes', type=str, default=[], help='exception patterns '
-                                                                     'when moving files to server.')
+        parser.add_argument('--gpus', '-G', metavar='num', type=int,
+                            help='number of GPUs required by the job (1 default).')
+        parser.add_argument('--sync', metavar='directory', type=str,
+                            help='whether to sync the selected working directory to '
+                                 'a temp directory before executing the command.')
+        parser.add_argument('--excludes', metavar='pattern1,pattern2,...', type=str, default=[],
+                            help='exception patterns when moving files to server.')
 
         parser.add_argument('-K', action='store_true', help='kill the task spooler server')
         parser.add_argument('-C', action='store_true', help='clear the list of finished jobs')
         parser.add_argument('-l', action='store_true', help='show the job list (default action)')
-        parser.add_argument('-S', type=int, help='get/set the number of max simultaneous jobs of the server.')
-        parser.add_argument('-t', type=int, help='\"tail -n 10 -f\" the output of the job. Last run if -1.')
-        parser.add_argument('-c', type=int, help='like -t, but shows all the lines. Last run if -1.')
-        parser.add_argument('-p', type=int, help='show the pid of the job. Last run if -1.')
-        parser.add_argument('-o', type=int, help='show the output file. Of last job run, if -1.')
-        parser.add_argument('-i', type=int, help='show job information. Of last job run, if -1.')
-        parser.add_argument('-s', type=int, help='show the job state. Of the last added, if -1.')
-        parser.add_argument('-r', type=int, help='remove a job. The last added, if -1.')
-        parser.add_argument('-w', type=int, help='wait for a job. The last added, if -1.')
-        parser.add_argument('-k', type=int, help='send SIGTERM to the job process group. The last run, if -1.')
+        parser.add_argument('-S', metavar='num', type=int,
+                            help='get/set the number of max simultaneous jobs of the server.')
+        parser.add_argument('-t', metavar='job_id', type=int,
+                            help='\"tail -n 10 -f\" the output of the job. Last run if -1.')
+        parser.add_argument('-c', metavar='job_id', type=int, help='like -t, but shows all the lines. Last run if -1.')
+        parser.add_argument('-p', metavar='job_id', type=int, help='show the pid of the job. Last run if -1.')
+        parser.add_argument('-o', metavar='job_id', type=int, help='show the output file. Of last job run, if -1.')
+        parser.add_argument('-i', metavar='job_id', type=int, help='show job information. Of last job run, if -1.')
+        parser.add_argument('-s', metavar='job_id', type=int, help='show the job state. Of the last added, if -1.')
+        parser.add_argument('-r', metavar='job_id', type=int, help='remove a job. The last added, if -1.')
+        parser.add_argument('-w', metavar='job_id', type=int, help='wait for a job. The last added, if -1.')
+        parser.add_argument('-k', metavar='job_id', type=int,
+                            help='send SIGTERM to the job process group. The last run, if -1.')
         parser.add_argument('-T', action='store_true', help='send SIGTERM to all running job groups.')
-        parser.add_argument('-u', type=int, help='put that job first. The last added, if not specified.')
-        parser.add_argument('-U', type=str, help='swap two jobs in the queue.')
+        parser.add_argument('-u', metavar='job_id', type=int,
+                            help='put that job first. The last added, if not specified.')
+        parser.add_argument('-U', metavar='job_id1-job_id2', type=str, help='swap two jobs in the queue.')
         parser.add_argument('-B', action='store_true', help='in case of full queue on the server, '
                                                             'quit (2) instead of waiting.')
         parser.add_argument('-V', action='store_true', help='show the program version')
 
-        parser.add_argument('-n', help='don\'t store the output of the command.')
-        parser.add_argument('-E', help='Keep stderr apart, in a name like the output file, but adding \'.e\'.')
-        parser.add_argument('-g', help='gzip the stored output (if not -n).')
-        parser.add_argument('-f', help='don\'t fork into background.')
-        parser.add_argument('-m', help='send the output by e-mail (uses sendmail).')
-        parser.add_argument('-d', help='the job will be run after the last job ends.')
+        parser.add_argument('-n', action='store_false', help='don\'t store the output of the command.')
+        parser.add_argument('-E', action='store_true',
+                            help='Keep stderr apart, in a name like the output file, but adding \'.e\'.')
+        parser.add_argument('-g', action='store_true', help='gzip the stored output (if not -n).')
+        parser.add_argument('-f', action='store_false', help='don\'t fork into background.')
+        parser.add_argument('-m', action='store_true', help='send the output by e-mail (uses sendmail).')
+        parser.add_argument('-d', action='store_true', help='the job will be run after the last job ends.')
         parser.add_argument('-D', type=int, help='the job will be run after the job of given id ends.')
         parser.add_argument('-L', type=str, help='name this task with a label, to be distinguished on listing.')
         parser.add_argument('-N', type=int, help='number of slots required by the job (1 default).')
-        self.args, _ = parser.parse_known_intermixed_args(self.argv)
+        self.args, self.cmd = parser.parse_known_intermixed_args(self.argv)
 
 
 class MessengerClient:
@@ -92,6 +101,18 @@ class MessengerClient:
         self.conn = Connection(rows[0], rows[1])
         self.arg = Argument(argv)
         self.socket = socket.socket()
+
+    @property
+    def should_wait(self):  # whether to receive once
+        if self.arg.args.c is None \
+                and self.arg.args.t is None \
+                and not self.arg.args.num_free_gpus \
+                and not self.arg.args.show_free_gpus \
+                and self.arg.cmd \
+                and not self.arg.args.l:
+            return False
+        else:
+            return True
 
     def choose_server(self):
         cmd = ['ms', '--num_free_gpus']
@@ -147,21 +168,16 @@ class MessengerClient:
             self.socket.sendall(self.arg.argv[i].encode('utf8'))
 
         # receive data from the server
-        if self.arg.args.c is None \
-                and self.arg.args.t is None \
-                and not self.arg.args.num_free_gpus \
-                and not self.arg.args.show_free_gpus \
-                and len(self.arg.argv) > 1 \
-                and not self.arg.args.l:
-            data = self.socket.recv(1024)
-            if data:
-                print(data.decode())
-        else:
+        if self.should_wait:
             while True:
                 data = self.socket.recv(1024)
                 if not data:
                     break
 
-                print(data.decode())
+                print(data.decode(), end='')
+        else:
+            data = self.socket.recv(1024)
+            if data:
+                print(data.decode(), end='')
 
         self.socket.close()
