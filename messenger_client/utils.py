@@ -51,6 +51,8 @@ class Argument:
                                  'a temp directory before executing the command.')
         parser.add_argument('--excludes', metavar='pattern1,pattern2,...', type=str, default=[],
                             help='exception patterns when moving files to server.')
+        parser.add_argument('--full_cmd', metavar='job_id', type=int,
+                            help='show full command. Of the last added, if not specified.')
 
         parser.add_argument('-K', action='store_true', help='kill the task spooler server')
         parser.add_argument('-C', action='store_true', help='clear the list of finished jobs')
