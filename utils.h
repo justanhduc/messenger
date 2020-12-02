@@ -38,14 +38,11 @@ enum Actions {
 
 class Connection {
 public:
-    strings hosts;
-    ints ports;
-    int numHosts = 0;
-    int hostNum = 0;
+    std::string host;
+    int port{};
 
-    Connection() : numHosts(0), hostNum(0) {};
-
-    explicit Connection(const std::string &);
+    Connection() {};
+    Connection(const std::string &);
 };
 
 class Environment {

@@ -9,19 +9,11 @@
 
 Connection::Connection(const std::string &filename) {
     std::ifstream file(filename);
-    std::string host;
-    int port;
-    numHosts = 0;
     if (!file.is_open())
         report("Cannot open host file");
     else {
-        while (file >> host >> port) {
-            hosts.push_back(host);
-            ports.push_back(port);
-            numHosts++;
-        }
+        file >> host >> port;
     }
-    hostNum = 0;
 }
 
 void Environment::setEnv() {
@@ -72,21 +64,14 @@ int Argument::parseOpts(int argc, strings &argv) {
                 if (strcmp(longOptions[optionIdx].name, "cd") == 0) {
                     currentDir = optarg;
                     cmdIdx += 2;
-                } else if (strcmp(longOptions[optionIdx].name, "host") == 0) {
-                    conn.hostNum = atoi(optarg);
-                    if (conn.hostNum > conn.numHosts - 1) {
-                        logging.log(
-                                "There are only %d hosts but chose host %d (zero-based)", conn.numHosts, conn.hostNum);
-                        exit(-1);
-                    }
-                    cmdIdx += 2;
                 } else if (strcmp(longOptions[optionIdx].name, "env") == 0) {
                     env.parseFlag(optarg);
                     cmdIdx += 2;
                 } else if (strcmp(longOptions[optionIdx].name, "auto_server") == 0) {
                     cmdIdx += 1;
                 } else if (strcmp(longOptions[optionIdx].name, "exclude") == 0 ||
-                           strcmp(longOptions[optionIdx].name, "sync") == 0) {
+                           strcmp(longOptions[optionIdx].name, "sync") == 0 ||
+                           strcmp(longOptions[optionIdx].name, "host") == 0) {
                     cmdIdx += 2;
                 } else if (strcmp(longOptions[optionIdx].name, "num_free_gpus") == 0) {
                     action = COUNT_FREE_GPUS;
@@ -169,7 +154,7 @@ bool isBooted(boost::asio::io_context &io_context, const std::string &filename) 
     tcp::socket socket(io_context);
     boost::asio::ip::address ip_address =
             boost::asio::ip::address::from_string("127.0.0.1", error);
-    tcp::endpoint endpoint(ip_address, arg.conn.ports[arg.conn.hostNum]);
+    tcp::endpoint endpoint(ip_address, arg.conn.port);
     socket.connect(endpoint, error);
     return !(error);
 }

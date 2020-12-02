@@ -28,7 +28,7 @@ public:
                 acceptor.native_handle(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &option, sizeof(option)) < 0)
             logging.log("setsockopt failed");
 
-        acceptor.bind(tcp::endpoint(tcp::v4(), arg.conn.ports[arg.conn.hostNum]));
+        acceptor.bind(tcp::endpoint(tcp::v4(), arg.conn.port));
         acceptor.listen(0);
 
         startSignalWait();
