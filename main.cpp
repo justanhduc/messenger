@@ -1,0 +1,69 @@
+/* Created by justanhduc on 11/5/20. */
+
+#include <cstdlib>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
+#include <sys/stat.h>
+
+# include "utils.h"
+#include "server.h"
+
+std::string tmpRoot = "/tmp/messenger-tmp";
+Logging logging;
+
+bool isPathExist(const std::string &s)
+{
+    struct stat buffer{};
+    return (stat (s.c_str(), &buffer) == 0);
+}
+
+int main() {
+    if (!isPathExist(tmpRoot))
+        mkdir(tmpRoot.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+    std::string root = std::getenv("HOME");
+    std::string filename = "/.hosts_ports";
+    boost::asio::io_context ioContext;
+    if (isBooted(ioContext, root + filename)) {
+        auto str = "Server is already running...";
+        logging.log(str);
+        std::cout << str << std::endl;
+        return 0;
+    }
+
+    try {
+        MessengerServer server(ioContext, root + filename);
+        int p[2], res;
+        res = pipe(p);
+        if (res == -1)
+            logging.log("Cannot open a pipe");
+
+        if (fork() == 0) {
+            close(p[0]);
+            close(0);
+            close(1);
+            close(2);
+            auto pid = ::getpid();
+            res = write(p[1], &pid, sizeof(int));
+            if (res == -1)
+                logging.log("Cannot write to pipe");
+
+            setsid();
+            ioContext.run();
+            exit(0);
+        } else {
+            close(p[1]);
+            res = read(p[0], &server.pid, sizeof(int));
+            if (res == -1)
+                logging.log("Cannot write to pipe");
+
+            auto str = "Server has been booted";
+            std::cout << str << std::endl;
+            logging.log(str);
+        }
+    } catch (std::exception &e) {
+        logging.log("%s", e.what());
+    }
+
+    return 0;
+}
