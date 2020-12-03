@@ -34,9 +34,13 @@ The full list of commands is provided below.
 
 ```
 >>> ms -h
-usage: Messenger [-h] [--cd directory] [--env FLAG=VALUE] [--host host_num] [--show_free_gpus] [--num_free_gpus] [--auto_server] [--kill] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] [--count_running] [--last_queue_id]
-                 [--gpus num] [--sync directory] [--excludes pattern1,pattern2,...] [--full_cmd job_id] [-K] [-C] [-l] [-S num] [-t job_id] [-c job_id] [-p job_id] [-o job_id] [-i job_id] [-s job_id] [-r job_id] [-w job_id]
-                 [-k job_id] [-T] [-u job_id] [-U job_id1-job_id2] [-B] [-V] [-n] [-E] [-g] [-f] [-m] [-d] [-D D] [-L L] [-N N]
+usage: Messenger [-h] [--cd directory] [--env FLAG=VALUE] [--host host_num] [--show_free_gpus] [--num_free_gpus]
+                 [--auto_server] [--kill] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label]
+                 [--count_running] [--last_queue_id] [--gpus num] [--sync directory]
+                 [--excludes pattern1,pattern2,...] [--full_cmd job_id] [-K] [-C] [-l] [-S num] [-t job_id]
+                 [-c job_id] [-p job_id] [-o job_id] [-i job_id] [-s job_id] [-r job_id] [-w job_id] [-k job_id]
+                 [-T] [-u job_id] [-U job_id1-job_id2] [-B] [-V] [-n] [-E] [-g] [-f] [-m] [-d] [-D D] [-L L]
+                 [-N N]
                  command
 
 Messenger - A multi-server plugin for Task Spooler
@@ -60,7 +64,8 @@ optional arguments:
   --count_running, -R   return the number of running jobs
   --last_queue_id, -q   show the job ID of the last added.
   --gpus num, -G num    number of GPUs required by the job (1 default).
-  --sync directory      whether to sync the selected working directory to a temp directory before executing the command.
+  --sync directory      whether to sync the selected working directory to a temp directory before executing the
+                        command.
   --excludes pattern1,pattern2,...
                         exception patterns when moving files to server.
   --full_cmd job_id     show full command. Of the last added, if not specified.
