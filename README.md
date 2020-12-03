@@ -10,9 +10,11 @@ Any feedback from Task Spooler is redirected back to client via Messenger server
 
 ## Requirements
 
-[Boost]() (>=)
+[CMake](https://cmake.org/)
 
-[CUDA]()
+[Boost](https://www.boost.org/) (>= 1.66) (Tested with Boost 1.74)
+
+[CUDA](https://developer.nvidia.com/CUDA-toolkit) (Tested with CUDA 10 and 11)
 
 ## Installation
 
@@ -35,6 +37,11 @@ in which `<port>` is the listening port the server will open.
 Next, boot the server by
 
 ```
-ts_server
+ms_server
 ``` 
 If the output says `Server has been booted`, then it's done!
+One can check if the server is listening on the specified port via the command
+
+```
+lsof -i :<port>
+```

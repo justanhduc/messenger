@@ -41,8 +41,8 @@ public:
     std::string host;
     int port{};
 
-    Connection() {};
-    Connection(const std::string &);
+    Connection() = default;
+    explicit Connection(const std::string &);
 };
 
 class Environment {
