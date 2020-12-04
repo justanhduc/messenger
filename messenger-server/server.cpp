@@ -12,30 +12,30 @@ void MessengerServer::startProcess() {
     // start reading in arguments
     socket_.read_some(boost::asio::buffer(&argc, sizeof(int)), error);
     if (error)
-        throw boost::system::system_error(error); // Some other error.
+        logger.log(ERROR, __FILE__, __LINE__, error.message()); // Some other error.
     argc = ntohl(argc);
 
     for (int i = 0; i < argc; ++i) {
         int len;
         size_t res = socket_.read_some(boost::asio::buffer(&len, sizeof(int)), error);
         if (res < 0)
-            logging.log("Error reading from client");
+            logger.log(ERROR, __FILE__, __LINE__, "Error reading from client");
         len = ntohl(len);
 
         boost::array<char, BSIZE> buf{};
         res = socket_.read_some(boost::asio::buffer(buf, len), error);
         if (res < 0)
-            logging.log("Error reading from client");
+            logger.log(ERROR, __FILE__, __LINE__, "Error reading from client");
 
         if (error == boost::asio::error::eof)
             break; // Connection closed cleanly by peer.
         else if (error)
-            throw boost::system::system_error(error); // Some other error.
+            logger.log(ERROR, __FILE__, __LINE__, error.message()); // Some other error.
 
         std::string argument(buf.begin(), len);
         argv.push_back(argument);
     }
-    logging.log(argv);
+    logger.log(INFO, __FILE__, __LINE__, argv);
 
     // set up to execute commands
     arg.env.setGetoptEnv();
@@ -63,7 +63,7 @@ void MessengerServer::startProcess() {
         case TASK_SPOOLER: {
             auto tsCmd = buildTsCommand(argv, optIdx);
             arg.env.setEnv();
-            logging.log(tsCmd);
+            logger.log(INFO, __FILE__, __LINE__, tsCmd);
 
             ioContext.notify_fork(boost::asio::io_context::fork_child);
             acceptor.close();
@@ -83,7 +83,7 @@ void MessengerServer::startProcess() {
 //                close(socket_.native_handle());
 //                execvp(tsCmd[0], tsCmd.data());
                 if (result != 0)
-                    logging.log("Command failed to execute. Exit code: %d", result);
+                    logger.log(ERROR, __FILE__, __LINE__, "Command failed to execute. Exit code: %d", result);
             } else {
                 // running a job causes the client to wait.
                 // rather lets queue a job without stdout and std_err,
@@ -103,6 +103,6 @@ void MessengerServer::startProcess() {
             break;
         }
         default:
-            logging.log("Wrong action!");
+            logger.log(ERROR, __FILE__, __LINE__, "Wrong action %d!", arg.action);
     }
 }

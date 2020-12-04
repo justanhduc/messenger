@@ -9,7 +9,7 @@
 #include "server.h"
 
 std::string tmpRoot = "/tmp/messenger-tmp";
-Logging logging;
+Logger logger;
 
 bool isPathExist(const std::string &s)
 {
@@ -26,7 +26,7 @@ int main() {
     boost::asio::io_context ioContext;
     if (isBooted(ioContext, root + filename)) {
         auto str = "Server is already running...";
-        logging.log(str);
+        logger.log(INFO, __FILE__, __LINE__, str);
         std::cout << str << std::endl;
         return 0;
     }
@@ -36,7 +36,7 @@ int main() {
         int p[2], res;
         res = pipe(p);
         if (res == -1)
-            logging.log("Cannot open a pipe");
+            logger.log(ERROR, __FILE__, __LINE__, "Cannot open a pipe");
 
         if (fork() == 0) {
             close(p[0]);
@@ -46,7 +46,7 @@ int main() {
             auto pid = ::getpid();
             res = write(p[1], &pid, sizeof(int));
             if (res == -1)
-                logging.log("Cannot write to pipe");
+                logger.log(ERROR, __FILE__, __LINE__, "Cannot write to pipe");
 
             setsid();
             ioContext.run();
@@ -55,14 +55,14 @@ int main() {
             close(p[1]);
             res = read(p[0], &server.pid, sizeof(int));
             if (res == -1)
-                logging.log("Cannot write to pipe");
+                logger.log(ERROR, __FILE__, __LINE__, "Cannot write to pipe");
 
             auto str = "Server has been booted";
             std::cout << str << std::endl;
-            logging.log(str);
+            logger.log(INFO, __FILE__, __LINE__, str);
         }
     } catch (std::exception &e) {
-        logging.log("%s", e.what());
+        logger.log(WARNING, __FILE__, __LINE__, "%s", e.what());
     }
 
     return 0;

@@ -12,7 +12,7 @@
 
 namespace fs = boost::filesystem;
 
-inline int vscprintf (const char * format, va_list pargs) {
+inline int vscprintf(const char *format, va_list pargs) {
     /* from https://stackoverflow.com/a/4785411/4591601 */
 
     int retval;
@@ -23,7 +23,7 @@ inline int vscprintf (const char * format, va_list pargs) {
     return retval;
 }
 
-Logging::Logging() {
+BaseLogger::BaseLogger() {
     std::string homedir = getenv("HOME");
     fs::path root(homedir);
     fs::path name(filename);
@@ -36,13 +36,13 @@ Logging::Logging() {
     }
 }
 
-void Logging::logTime() {
+void BaseLogger::logTime() {
     auto now = std::chrono::system_clock::now();
     auto timeNow = std::chrono::system_clock::to_time_t(now);
     ofs << std::ctime(&timeNow) << " ";
 }
 
-void Logging::log(const char * fmt, ...) {
+void BaseLogger::log(const char *fmt, ...) {
     /* from https://stackoverflow.com/a/3280304/4591601 */
 
     va_list varptr;
@@ -54,26 +54,16 @@ void Logging::log(const char * fmt, ...) {
     ::vsprintf(&buf[0], fmt, varptr);
     va_end(varptr);
 
-    // writing log time
-    logTime();
-
-    // copy each character to the stream
-    ofs << "\t";
     std::copy(buf.begin(), buf.end(), std::ostream_iterator<char>(ofs));
-    ofs << std::endl;
 }
 
-void Logging::log(const strings& cmd, const std::string& delimiter) {
-    logTime();
-    ofs << "\t";
-    for(auto & i : cmd) {
+void BaseLogger::log(const strings &strs, const std::string &delimiter) {
+    for (auto &i : strs) {
         ofs << i;
         ofs << delimiter;
     }
-    ofs << std::endl;
 }
 
-void Logging::log(const std::string& cmd) {
-    logTime();
-    ofs << "\t" << cmd.c_str() << std::endl;
+void BaseLogger::log(const std::string &str) {
+    ofs << str;
 }

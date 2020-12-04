@@ -26,7 +26,7 @@ public:
         acceptor.open(tcp::v4());
         if (setsockopt(
                 acceptor.native_handle(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &option, sizeof(option)) < 0)
-            logging.log("setsockopt failed");
+            logger.log(ERROR, __FILE__, __LINE__, "setsockopt failed");
 
         acceptor.bind(tcp::endpoint(tcp::v4(), arg.conn.port));
         acceptor.listen(0);
@@ -80,7 +80,7 @@ private:
                 startAccept();
             }
         } else {
-            logging.log("Accept error: %s", ec.message().c_str());
+            logger.log(WARNING, __FILE__, __LINE__, "Accept error: %s", ec.message().c_str());
             startAccept();
         }
     }

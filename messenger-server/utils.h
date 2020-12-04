@@ -27,7 +27,7 @@ typedef boost::asio::detail::socket_option::boolean<SOL_SOCKET, SO_REUSEADDR | S
 typedef std::vector<char *> cstrings;
 typedef std::vector<int> ints;
 
-extern Logging logging;
+extern Logger logger;
 
 enum Actions {
     SHOW_FREE_GPUS,
