@@ -26,8 +26,9 @@ class Argument:
         parser.add_argument('--cd', metavar='directory', type=str,
                             help='change directory. For e.g., ``ms --cd /home/justanhduc/Documents``.')
         parser.add_argument('--env', metavar='FLAG=VALUE', type=str,
-                            help='set an environment variable flag. For e.g., ``ms --env CUDA_VISIBLE_DEVICES=0``.')
-        parser.add_argument('--host', metavar='host_num', type=int, default=0,
+                            help='set environment variable flags. Multiple flags are separated by \':\'.'
+                                 'For e.g., ``ms --env FOO1=bar1:FOO2=bar2``.')
+        parser.add_argument('--host', '-H', metavar='host_num', type=int, default=0,
                             help='host to select. Value corresponds to the order '
                                  'specified in the \".hosts_ports\" file.')
         parser.add_argument('--show_free_gpus', action='store_true', help='show current available GPUs info.')
@@ -85,9 +86,10 @@ class Argument:
         parser.add_argument('-f', action='store_false', help='don\'t fork into background.')
         parser.add_argument('-m', action='store_true', help='send the output by e-mail (uses sendmail).')
         parser.add_argument('-d', action='store_true', help='the job will be run after the last job ends.')
-        parser.add_argument('-D', type=int, help='the job will be run after the job of given id ends.')
-        parser.add_argument('-L', type=str, help='name this task with a label, to be distinguished on listing.')
-        parser.add_argument('-N', type=int, help='number of slots required by the job (1 default).')
+        parser.add_argument('-D', metavar='job_id', type=int, help='the job will be run after the job of given id ends.')
+        parser.add_argument('-L', metavar='label', type=str,
+                            help='name this task with a label, to be distinguished on listing.')
+        parser.add_argument('-N', metavar='num', type=int, help='number of slots required by the job (1 default).')
         self.args, self.cmd = parser.parse_known_intermixed_args(self.argv)
 
 
