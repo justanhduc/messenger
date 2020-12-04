@@ -25,9 +25,12 @@ void Environment::setEnv() {
 }
 
 void Environment::parseFlag(std::string flag) {
-    strings flagsVals = splitString(flag, "=");
-    envFlags.push_back(flagsVals[0]);
-    envFlagVals.push_back(flagsVals[1]);
+    strings envs = splitString(std::move(flag), ":");
+    for (auto &it : envs) {
+        strings flagsVals = splitString(std::move(it), "=");
+        envFlags.push_back(flagsVals[0]);
+        envFlagVals.push_back(flagsVals[1]);
+    }
 }
 
 strings splitString(std::string s, const std::string &delimiter) {
@@ -78,8 +81,7 @@ int Argument::parseOpts(int argc, strings &argv) {
                     action = SHOW_FREE_GPUS;
                 } else if (strcmp(longOptions[optionIdx].name, "kill") == 0) {
                     action = KILL_SERVER;
-                } else
-                    logging.log("Unknown option %s", longOptions[optionIdx].name);
+                }
                 break;
             case 'H':
                 cmdIdx += 2;
@@ -133,7 +135,7 @@ std::string recvString(int fd) {
 std::string buildTsCommand(strings &argv, int index) {
     std::string cmd = "ts ";
     for (auto it = argv.begin() + index; it != argv.end(); ++it) {
-        std::string tmp(it->c_str());
+        std::string tmp(it->c_str());  // truncate \00 in it
         cmd += tmp;
         cmd += " ";
     }
