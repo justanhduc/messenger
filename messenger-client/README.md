@@ -35,7 +35,7 @@ The full list of commands is provided below.
 ```
 >>> ms -h
 usage: ms [messenger-flags] [task-spooler-flags] [command] 
-       messenger-flags: [--cd directory] [--env FLAG=VALUE] [--host host_num] 
+       messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host host_num] 
                         [--show_free_gpus] [--num_free_gpus] [--auto_server] 
                         [--kill] [--sync directory] [--excludes pattern1,pattern2,...] 
        task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] 
