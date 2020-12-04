@@ -10,7 +10,7 @@ regarding the sent task.
 ## Installation
 
 ```
-python setup.py install
+make install
 ```
 
 ## Usages
@@ -34,14 +34,16 @@ The full list of commands is provided below.
 
 ```
 >>> ms -h
-usage: Messenger [-h] [--cd directory] [--env FLAG=VALUE] [--host host_num] [--show_free_gpus] [--num_free_gpus]
-                 [--auto_server] [--kill] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label]
-                 [--count_running] [--last_queue_id] [--gpus num] [--sync directory]
-                 [--excludes pattern1,pattern2,...] [--full_cmd job_id] [-K] [-C] [-l] [-S num] [-t job_id]
-                 [-c job_id] [-p job_id] [-o job_id] [-i job_id] [-s job_id] [-r job_id] [-w job_id] [-k job_id]
-                 [-T] [-u job_id] [-U job_id1-job_id2] [-B] [-V] [-n] [-E] [-g] [-f] [-m] [-d] [-D D] [-L L]
-                 [-N N]
-                 command
+usage: ms [messenger-flags] [task-spooler-flags] [command] 
+       messenger-flags: [--cd directory] [--env FLAG=VALUE] [--host host_num] 
+                        [--show_free_gpus] [--num_free_gpus] [--auto_server] 
+                        [--kill] [--sync directory] [--excludes pattern1,pattern2,...] 
+       task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] 
+                           [--count_running] [--last_queue_id] [--gpus num] [--full_cmd job_id] 
+                           [-K] [-C] [-l] [-S num] [-t job_id] [-c job_id] [-p job_id] [-o job_id] 
+                           [-i job_id] [-s job_id] [-r job_id] [-w job_id] [-k job_id] [-T] 
+                           [-u job_id] [-U job_id1-job_id2] [-B] [-V] [-n] [-E] [-g] [-f] [-m] [-d] 
+                           [-D job_id] [-L label] [-N num] 
 
 Messenger - A multi-server plugin for Task Spooler
 
@@ -51,23 +53,24 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --cd directory        change directory. For e.g., ``ms --cd /home/justanhduc/Documents``.
-  --env FLAG=VALUE      set an environment variable flag. For e.g., ``ms --env CUDA_VISIBLE_DEVICES=0``.
-  --host host_num       host to select. Value corresponds to the order specified in the ".hosts_ports" file.
+  --env FLAG1=VALUE1:FLAG2=VALUE2:...
+                        set environment variable flags.
+  --host host_num, -H host_num
+                        host to select. Value corresponds to the order specified in the ".servers_ports" file.
   --show_free_gpus      show current available GPUs info.
   --num_free_gpus       show the number of available GPUs.
   --auto_server         auto-magically choose a server based on the number of available GPUs.
   --kill                kill Messenger server.
+  --sync directory      whether to sync the selected working directory to a temp directory before executing the
+                        command.
+  --excludes pattern1,pattern2,...
+                        exception patterns when moving files to server.
   --set_gpu_wait seconds
                         set time to wait before running the next GPU job (30 seconds by default)
   --get_gpu_wait        get time to wait before running the next GPU job.
   --get_label, -a       show the job label. Of the last added, if not specified.
   --count_running, -R   return the number of running jobs
   --last_queue_id, -q   show the job ID of the last added.
-  --gpus num, -G num    number of GPUs required by the job (1 default).
-  --sync directory      whether to sync the selected working directory to a temp directory before executing the
-                        command.
-  --excludes pattern1,pattern2,...
-                        exception patterns when moving files to server.
   --full_cmd job_id     show full command. Of the last added, if not specified.
   -K                    kill the task spooler server
   -C                    clear the list of finished jobs
@@ -93,7 +96,8 @@ optional arguments:
   -f                    don't fork into background.
   -m                    send the output by e-mail (uses sendmail).
   -d                    the job will be run after the last job ends.
-  -D D                  the job will be run after the job of given id ends.
-  -L L                  name this task with a label, to be distinguished on listing.
-  -N N                  number of slots required by the job (1 default).
+  -D job_id             the job will be run after the job of given id ends.
+  -L label              name this task with a label, to be distinguished on listing.
+  -N num                number of slots required by the job (1 default).
+  --gpus num, -G num    number of GPUs required by the job (1 default).
 ```
