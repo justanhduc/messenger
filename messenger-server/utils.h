@@ -98,10 +98,6 @@ static struct option longOptions[] = {
         {nullptr, 0,                          nullptr, 0}
 };
 
-static inline void report(const std::string &msg) {
-    std::fprintf(stderr, "%s\n", msg.c_str());
-}
-
 cstrings stringsToCstring(strings &);
 
 strings splitString(std::string s, const std::string &delimiter);

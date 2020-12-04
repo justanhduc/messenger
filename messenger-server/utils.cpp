@@ -10,7 +10,7 @@
 Connection::Connection(const std::string &filename) {
     std::ifstream file(filename);
     if (!file.is_open())
-        report("Cannot open host file");
+        logger.log(ERROR, __FILE__, __LINE__, "Cannot open host file");
     else {
         file >> host >> port;
     }
@@ -105,27 +105,26 @@ void sendString(int fd, const std::string &string) {
     uint32_t size = htonl(string.length());
     res = send(fd, &size, sizeof(uint32_t), MSG_CONFIRM);
     if (res < 0)
-        report("Cannot send package");
+        logger.log(ERROR, __FILE__, __LINE__, "Cannot send package");
 
     res = send(fd, string.c_str(), string.size(), MSG_CONFIRM);
     if (res < 0)
-        report("Cannot send package");
+        logger.log(ERROR, __FILE__, __LINE__, "Cannot send package");
 }
 
 std::string recvString(int fd) {
     int res;
     uint32_t size;
     res = recv(fd, &size, sizeof(uint32_t), 0);
-    if (res == -1) {
-        report("Cannot receive package");
-    }
+    if (res == -1)
+        logger.log(ERROR, __FILE__, __LINE__, "Cannot receive package");
     size = ntohl(size);
 
     std::vector<char> rcvBuf;    // Allocate a receive buffer
     rcvBuf.resize(size, 0x00); // with the necessary size
     res = recv(fd, &(rcvBuf[0]), size, 0); // Receive the string data
     if (res == -1)
-        report("Cannot receive package");
+        logger.log(ERROR, __FILE__, __LINE__, "Cannot receive package");
 
     std::string string;
     string.assign(&(rcvBuf[0]), rcvBuf.size());
