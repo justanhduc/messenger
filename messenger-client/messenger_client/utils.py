@@ -12,6 +12,20 @@ Connection = namedtuple('Connection', ('hosts', 'ports'))
 tmp_root = '/tmp/messenger-tmp'
 
 
+def get_usage():
+    usage = "ms [messenger-flags] [task-spooler-flags] [command] \n"
+    usage += "       messenger-flags: [--cd directory] [--env FLAG=VALUE] [--host host_num] \n" \
+             "                        [--show_free_gpus] [--num_free_gpus] [--auto_server] \n" \
+             "                        [--kill] [--sync directory] [--excludes pattern1,pattern2,...] \n"
+    usage += "       task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] \n" \
+             "                           [--count_running] [--last_queue_id] [--gpus num] [--full_cmd job_id] \n" \
+             "                           [-K] [-C] [-l] [-S num] [-t job_id] [-c job_id] [-p job_id] [-o job_id] \n" \
+             "                           [-i job_id] [-s job_id] [-r job_id] [-w job_id] [-k job_id] [-T] \n" \
+             "                           [-u job_id] [-U job_id1-job_id2] [-B] [-V] [-n] [-E] [-g] [-f] [-m] [-d] \n" \
+             "                           [-D job_id] [-L label] [-N num] \n"
+    return usage
+
+
 class Argument:
     def __init__(self, argv):
         self.argv = list(argv)
@@ -21,21 +35,26 @@ class Argument:
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(prog='Messenger',
-                                         description='Messenger - A multi-server plugin for Task Spooler')
+                                         description='Messenger - A multi-server plugin for Task Spooler',
+                                         usage=get_usage())
         parser.add_argument('cmd', metavar='command', type=str, help='job to be run')
         parser.add_argument('--cd', metavar='directory', type=str,
                             help='change directory. For e.g., ``ms --cd /home/justanhduc/Documents``.')
-        parser.add_argument('--env', metavar='FLAG=VALUE', type=str,
-                            help='set environment variable flags. Multiple flags are separated by \':\'.'
-                                 'For e.g., ``ms --env FOO1=bar1:FOO2=bar2``.')
+        parser.add_argument('--env', metavar='FLAG1=VALUE1:FLAG2=VALUE2:...', type=str,
+                            help='set environment variable flags.')
         parser.add_argument('--host', '-H', metavar='host_num', type=int, default=0,
                             help='host to select. Value corresponds to the order '
-                                 'specified in the \".hosts_ports\" file.')
+                                 'specified in the \".servers_ports\" file.')
         parser.add_argument('--show_free_gpus', action='store_true', help='show current available GPUs info.')
         parser.add_argument('--num_free_gpus', action='store_true', help='show the number of available GPUs.')
         parser.add_argument('--auto_server', action='store_true', help='auto-magically choose a server based on '
                                                                        'the number of available GPUs.')
         parser.add_argument('--kill', action='store_true', help='kill Messenger server.')
+        parser.add_argument('--sync', metavar='directory', type=str,
+                            help='whether to sync the selected working directory to '
+                                 'a temp directory before executing the command.')
+        parser.add_argument('--excludes', metavar='pattern1,pattern2,...', type=str, default=[],
+                            help='exception patterns when moving files to server.')
 
         parser.add_argument('--set_gpu_wait', metavar='seconds', type=int,
                             help='set time to wait before running the next GPU job (30 seconds by default)')
@@ -45,16 +64,8 @@ class Argument:
                             help='show the job label. Of the last added, if not specified.')
         parser.add_argument('--count_running', '-R', action='store_true', help='return the number of running jobs')
         parser.add_argument('--last_queue_id', '-q', action='store_true', help='show the job ID of the last added.')
-        parser.add_argument('--gpus', '-G', metavar='num', type=int,
-                            help='number of GPUs required by the job (1 default).')
-        parser.add_argument('--sync', metavar='directory', type=str,
-                            help='whether to sync the selected working directory to '
-                                 'a temp directory before executing the command.')
-        parser.add_argument('--excludes', metavar='pattern1,pattern2,...', type=str, default=[],
-                            help='exception patterns when moving files to server.')
         parser.add_argument('--full_cmd', metavar='job_id', type=int,
                             help='show full command. Of the last added, if not specified.')
-
         parser.add_argument('-K', action='store_true', help='kill the task spooler server')
         parser.add_argument('-C', action='store_true', help='clear the list of finished jobs')
         parser.add_argument('-l', action='store_true', help='show the job list (default action)')
@@ -90,6 +101,8 @@ class Argument:
         parser.add_argument('-L', metavar='label', type=str,
                             help='name this task with a label, to be distinguished on listing.')
         parser.add_argument('-N', metavar='num', type=int, help='number of slots required by the job (1 default).')
+        parser.add_argument('--gpus', '-G', metavar='num', type=int,
+                            help='number of GPUs required by the job (1 default).')
         self.args, self.cmd = parser.parse_known_intermixed_args(self.argv)
 
 
