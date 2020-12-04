@@ -97,7 +97,8 @@ class Argument:
         parser.add_argument('-f', action='store_false', help='don\'t fork into background.')
         parser.add_argument('-m', action='store_true', help='send the output by e-mail (uses sendmail).')
         parser.add_argument('-d', action='store_true', help='the job will be run after the last job ends.')
-        parser.add_argument('-D', metavar='job_id', type=int, help='the job will be run after the job of given id ends.')
+        parser.add_argument('-D', metavar='job_id', type=int,
+                            help='the job will be run after the job of given id ends.')
         parser.add_argument('-L', metavar='label', type=str,
                             help='name this task with a label, to be distinguished on listing.')
         parser.add_argument('-N', metavar='num', type=int, help='number of slots required by the job (1 default).')

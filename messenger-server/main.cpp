@@ -11,10 +11,9 @@
 std::string tmpRoot = "/tmp/messenger-tmp";
 Logger logger;
 
-bool isPathExist(const std::string &s)
-{
+bool isPathExist(const std::string &s) {
     struct stat buffer{};
-    return (stat (s.c_str(), &buffer) == 0);
+    return (stat(s.c_str(), &buffer) == 0);
 }
 
 int main() {

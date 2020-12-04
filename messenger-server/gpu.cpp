@@ -25,13 +25,15 @@ ints getFreeGpuList() {
         nvmlDevice_t dev;
         result = nvmlDeviceGetHandleByIndex_v2(i, &dev);
         if (result != 0) {
-            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU handle for GPU %d: %s", i, nvmlErrorString(result));
+            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU handle for GPU %d: %s", i,
+                       nvmlErrorString(result));
             goto Error;
         }
 
         result = nvmlDeviceGetMemoryInfo(dev, &mem);
         if (result != 0) {
-            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU memory for GPU %d: %s", i, nvmlErrorString(result));
+            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU memory for GPU %d: %s", i,
+                       nvmlErrorString(result));
             goto Error;
         }
         if (mem.free > .9 * mem.total)
@@ -82,18 +84,21 @@ void showFreeGpuInfo() {
         char name[NVML_DEVICE_NAME_BUFFER_SIZE];
         result = nvmlDeviceGetHandleByIndex_v2(it, &dev);
         if (result != 0) {
-            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU handle for GPU %d: %s", it, nvmlErrorString(result));
+            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU handle for GPU %d: %s", it,
+                       nvmlErrorString(result));
             goto Error;
         }
 
         result = nvmlDeviceGetMemoryInfo(dev, &mem);
         if (result != 0) {
-            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU memory for GPU %d: %s", it, nvmlErrorString(result));
+            logger.log(WARNING, __FILE__, __LINE__, "Failed to get GPU memory for GPU %d: %s", it,
+                       nvmlErrorString(result));
             goto Error;
         }
         result = nvmlDeviceGetName(dev, name, NVML_DEVICE_NAME_BUFFER_SIZE);
         if (result != 0) {
-            logger.log(WARNING, __FILE__, __LINE__, "Failed to get name of device %u: %s\n", it, nvmlErrorString(result));
+            logger.log(WARNING, __FILE__, __LINE__, "Failed to get name of device %u: %s\n", it,
+                       nvmlErrorString(result));
             goto Error;
         }
         std::cout << it << std::setw(24) << name <<

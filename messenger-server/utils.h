@@ -42,6 +42,7 @@ public:
     int port{};
 
     Connection() = default;
+
     explicit Connection(const std::string &);
 };
 
