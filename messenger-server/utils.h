@@ -87,7 +87,7 @@ public:
 static struct option longOptions[] = {
         {"cd",             required_argument, nullptr, 0},
         {"env",            required_argument, nullptr, 0},
-        {"host",           required_argument, nullptr, 0},
+        {"host",           required_argument, nullptr, 'H'},
         {"show_free_gpus", no_argument,       nullptr, 0},
         {"num_free_gpus",  no_argument,       nullptr, 0},
         {"auto_server",    no_argument,       nullptr, 0},

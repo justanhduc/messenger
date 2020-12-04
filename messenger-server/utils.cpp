@@ -52,8 +52,7 @@ int Argument::parseOpts(int argc, strings &argv) {
     action = TASK_SPOOLER;
     /* Parse options */
     while (true) {
-        c = getopt_long(argc, cargv.data(), ":RVhKgClnfmBEr:a:t:c:o:p:w:k:u:s:U:qi:N:L:dS:D:",
-                        longOptions, &optionIdx);
+        c = getopt_long(argc, cargv.data(), "H:", longOptions, &optionIdx);
 
         if (c == -1) {
             break;
@@ -81,6 +80,9 @@ int Argument::parseOpts(int argc, strings &argv) {
                     action = KILL_SERVER;
                 } else
                     logging.log("Unknown option %s", longOptions[optionIdx].name);
+                break;
+            case 'H':
+                cmdIdx += 2;
                 break;
         }
     }
