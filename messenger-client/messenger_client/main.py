@@ -8,7 +8,7 @@ def main():
     try:
         client = utils.MessengerClient(sys.argv)
         client.exec()
-    except socket.timeout:
+    except (socket.timeout, KeyboardInterrupt):
         pass
 
 
