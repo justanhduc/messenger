@@ -73,7 +73,8 @@ int Argument::parseOpts(int argc, strings &argv) {
                     cmdIdx += 1;
                 } else if (strcmp(longOptions[optionIdx].name, "exclude") == 0 ||
                            strcmp(longOptions[optionIdx].name, "sync") == 0 ||
-                           strcmp(longOptions[optionIdx].name, "host") == 0) {
+                           strcmp(longOptions[optionIdx].name, "host") == 0 ||
+                           strcmp(longOptions[optionIdx].name, "sync_dest") == 0) {
                     cmdIdx += 2;
                 } else if (strcmp(longOptions[optionIdx].name, "num_free_gpus") == 0) {
                     action = COUNT_FREE_GPUS;

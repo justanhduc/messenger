@@ -16,7 +16,8 @@ def get_usage():
     usage = "ms [messenger-flags] [task-spooler-flags] [command] \n"
     usage += "       messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host host_num] \n" \
              "                        [--show_free_gpus] [--num_free_gpus] [--auto_server] \n" \
-             "                        [--kill] [--sync directory] [--excludes pattern1:pattern2:...] \n"
+             "                        [--kill] [--sync directory] [--sync_dest directory] " \
+             "                        [--excludes pattern1:pattern2:...] \n"
     usage += "       task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] \n" \
              "                           [--count_running] [--last_queue_id] [--gpus num] [--full_cmd job_id] \n" \
              "                           [-K] [-C] [-l] [-S num] [-t job_id] [-c job_id] [-p job_id] [-o job_id] \n" \
@@ -53,7 +54,9 @@ class Argument:
         parser.add_argument('--sync', metavar='directory', type=str,
                             help='whether to sync the selected working directory to '
                                  'a temp directory before executing the command.')
-        parser.add_argument('--excludes', metavar='pattern1:pattern2:...', type=str, default=[],
+        parser.add_argument('--sync_dest', metavar='directory', type=str,
+                            help='sync destination on the remote server.')
+        parser.add_argument('--excludes', metavar='pattern1:pattern2:...', type=str, default='',
                             help='exception patterns when moving files to server.')
 
         parser.add_argument('--set_gpu_wait', metavar='seconds', type=int,
@@ -152,14 +155,19 @@ class MessengerClient:
 
         return host_choice
 
-    def sync(self, host):
-        tmpdir = os.path.join(tmp_root, 'tmp-')
-        tmpdir += ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    def sync(self, host, target=None):
+        if target is None:
+            tmpdir = os.path.join(tmp_root, 'tmp-')
+            tmpdir += ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        else:
+            tmpdir = target
 
         cmd = ['rsync', '-vuar', self.arg.args.sync, f'{host}:{tmpdir}']
-        excludes = self.arg.args.excludes.split(':')
-        exclude = [f'--exclude={exclude}' for exclude in excludes]
-        cmd += exclude
+        if self.arg.args.excludes:
+            excludes = self.arg.args.excludes.split(':')
+            exclude = [f'--exclude={exclude}' for exclude in excludes]
+            cmd += exclude
+
         subprocess.call(cmd)  # sync using rsync
         return tmpdir
 
@@ -171,7 +179,7 @@ class MessengerClient:
         host = self.conn.hosts[choice]
         port = self.conn.ports[choice]
         if self.arg.args.sync is not None:
-            tmpdir = self.sync(host)
+            tmpdir = self.sync(host, self.arg.args.sync_dest)
 
             # change directory to the temp dir
             if self.arg.args.cd is None:

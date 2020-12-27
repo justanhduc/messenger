@@ -94,6 +94,7 @@ static struct option longOptions[] = {
         {"auto_server",    no_argument,       nullptr, 0},
         {"kill",           no_argument,       nullptr, 0},
         {"sync",           required_argument, nullptr, 0},
+        {"sync_dest",      required_argument, nullptr, 0},
         {"exclude",        required_argument, nullptr, 0},
         {nullptr, 0,                          nullptr, 0}
 };
