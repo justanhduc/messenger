@@ -12,4 +12,4 @@ ints selectFreeGpus(int n);
 void showFreeGpuInfo();
 std::string getCudaVisibleFlag(int n);
 
-#endif //MESSENGER_SERVER_GPU_H
+#endif // MESSENGER_SERVER_GPU_H

@@ -45,3 +45,7 @@ One can check if the server is listening on the specified port via the command
 ```
 lsof -i :<port>
 ```
+
+## Code style
+
+The codes have been formatted by [Clang-format](https://clang.llvm.org/docs/ClangFormat.html).
