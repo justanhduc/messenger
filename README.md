@@ -21,7 +21,9 @@ There are two separate steps to install Messenger properly.
 
 ## Known issues
 
-Sometimes, a GPU task may randomly hang.
+~~Sometimes, a GPU task may randomly hang.~~
+
+* This is due to `torch.multiprocessing.set_sharing_strategy('file_system')`.
 
 ## Disclaimer
 
