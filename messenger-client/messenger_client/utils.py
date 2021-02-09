@@ -23,7 +23,7 @@ def get_usage():
              "                           [-K] [-C] [-l] [-S num] [-t job_id] [-c job_id] [-p job_id] [-o job_id] \n" \
              "                           [-i job_id] [-s job_id] [-r job_id] [-w job_id] [-k job_id] [-T] \n" \
              "                           [-u job_id] [-U job_id1-job_id2] [-B] [-V] [-n] [-E] [-g] [-f] [-m] [-d] \n" \
-             "                           [-D job_id] [-L label] [-N num] \n"
+             "                           [-D job_id1,job_id2,...] [-W job_id1,job_id2,...] [-L label] [-N num] \n"
     return usage
 
 
@@ -100,8 +100,10 @@ class Argument:
         parser.add_argument('-f', action='store_false', help='don\'t fork into background.')
         parser.add_argument('-m', action='store_true', help='send the output by e-mail (uses sendmail).')
         parser.add_argument('-d', action='store_true', help='the job will be run after the last job ends.')
-        parser.add_argument('-D', metavar='job_id', type=int,
-                            help='the job will be run after the job of given id ends.')
+        parser.add_argument('-D', metavar='ID1,ID2,...', type=str,
+                            help='the job will be run after the job of given IDs ends.')
+        parser.add_argument('-W', metavar='ID1,ID2,...', type=str,
+                            help='the job will be run after the job of given IDs ends well (exit code 0).')
         parser.add_argument('-L', metavar='label', type=str,
                             help='name this task with a label, to be distinguished on listing.')
         parser.add_argument('-N', metavar='num', type=int, help='number of slots required by the job (1 default).')
