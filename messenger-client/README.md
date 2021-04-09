@@ -93,7 +93,7 @@ optional arguments:
   -V                    show the program version
   -n                    don't store the output of the command.
   -E                    Keep stderr apart, in a name like the output file, but adding '.e'.
-  -g                    gzip the stored output (if not -n).
+  -z                    gzip the stored output (if not -n).
   -f                    don't fork into background.
   -m                    send the output by e-mail (uses sendmail).
   -d                    the job will be run after the last job ends.

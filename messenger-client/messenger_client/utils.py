@@ -18,11 +18,12 @@ def get_usage():
              "                        [--show_free_gpus] [--num_free_gpus] [--auto_server] \n" \
              "                        [--kill] [--sync directory] [--sync_dest directory] [--exclude pattern1:pattern2:...] \n"
     usage += "       task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] \n" \
-             "                           [--count_running] [--last_queue_id] [--gpus num] [--full_cmd job_id] \n" \
+             "                           [--count_running] [--last_queue_id] [--gpus num] [--gpu_indices gpu_id1,gpu_id2,...] [--full_cmd job_id] \n" \
              "                           [-K] [-C] [-l] [-S num] [-t job_id] [-c job_id] [-p job_id] [-o job_id] \n" \
              "                           [-i job_id] [-s job_id] [-r job_id] [-w job_id] [-k job_id] [-T] \n" \
              "                           [-u job_id] [-U job_id1-job_id2] [-B] [-V] [-n] [-E] [-g] [-f] [-m] [-d] \n" \
              "                           [-D job_id1,job_id2,...] [-W job_id1,job_id2,...] [-L label] [-N num] \n"
+
     return usage
 
 
@@ -95,7 +96,7 @@ class Argument:
         parser.add_argument('-n', action='store_false', help='don\'t store the output of the command.')
         parser.add_argument('-E', action='store_true',
                             help='Keep stderr apart, in a name like the output file, but adding \'.e\'.')
-        parser.add_argument('-g', action='store_true', help='gzip the stored output (if not -n).')
+        parser.add_argument('-z', action='store_true', help='gzip the stored output (if not -n).')
         parser.add_argument('-f', action='store_false', help='don\'t fork into background.')
         parser.add_argument('-m', action='store_true', help='send the output by e-mail (uses sendmail).')
         parser.add_argument('-d', action='store_true', help='the job will be run after the last job ends.')
@@ -108,6 +109,8 @@ class Argument:
         parser.add_argument('-N', metavar='num', type=int, help='number of slots required by the job (1 default).')
         parser.add_argument('--gpus', '-G', metavar='num', type=int,
                             help='number of GPUs required by the job (1 default).')
+        parser.add_argument('--gpu_indices', '-g', metavar='ID1,ID2,...', type=str,
+                            help='the job will be on these GPU indices without checking whether they are free.')
         self.args, self.cmd = parser.parse_known_intermixed_args(self.argv)
 
 
