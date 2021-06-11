@@ -174,7 +174,7 @@ class MessengerClient:
 
         syncs = self.arg.args.sync.split(':')
         for to_sync in syncs:
-            cmd = ['rsync', '-vuar', to_sync]
+            cmd = ['rsync', '-uar', to_sync]
             cmd += exclude
             cmd += [f'{host}:{tmpdir}']
             subprocess.call(cmd)  # sync using rsync
