@@ -166,13 +166,19 @@ class MessengerClient:
         else:
             tmpdir = target
 
-        cmd = ['rsync', '-vuar', self.arg.args.sync, f'{host}:{tmpdir}']
         if self.arg.args.exclude:
             excludes = self.arg.args.exclude.split(':')
             exclude = [f'--exclude={exclude}' for exclude in excludes]
-            cmd += exclude
+        else:
+            exclude = []
 
-        subprocess.call(cmd)  # sync using rsync
+        syncs = self.arg.args.sync.split(':')
+        for to_sync in syncs:
+            cmd = ['rsync', '-vuar', to_sync]
+            cmd += exclude
+            cmd += [f'{host}:{tmpdir}']
+            subprocess.call(cmd)  # sync using rsync
+
         return tmpdir
 
     def exec(self):
