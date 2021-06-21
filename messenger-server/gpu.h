@@ -5,11 +5,17 @@
 #ifndef MESSENGER_SERVER_GPU_H
 #define MESSENGER_SERVER_GPU_H
 
+#include <tuple>
+#include <string>
+#include <vector>
 #include "utils.h"
 
+#define gpu_info std::vector<std::tuple<int, std::string, double , double>>
+
+gpu_info queryGPU();
+
 ints getFreeGpuList();
-ints selectFreeGpus(int n);
-void showFreeGpuInfo();
-std::string getCudaVisibleFlag(int n);
+
+void showGpuInfo(bool show_free=true);
 
 #endif // MESSENGER_SERVER_GPU_H

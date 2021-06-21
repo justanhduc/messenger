@@ -79,6 +79,8 @@ int Argument::parseOpts(int argc, strings &argv) {
         action = COUNT_FREE_GPUS;
       } else if (strcmp(longOptions[optionIdx].name, "show_free_gpus") == 0) {
         action = SHOW_FREE_GPUS;
+      } else if (strcmp(longOptions[optionIdx].name, "show_gpus") == 0) {
+          action = SHOW_GPUS;
       } else if (strcmp(longOptions[optionIdx].name, "kill") == 0) {
         action = KILL_SERVER;
       }
