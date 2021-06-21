@@ -15,7 +15,7 @@ tmp_root = '/tmp/messenger-tmp'
 def get_usage():
     usage = "ms [messenger-flags] [task-spooler-flags] [command] \n"
     usage += "       messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host host_num] \n" \
-             "                        [--show_free_gpus] [--num_free_gpus] [--auto_server] \n" \
+             "                        [--show_gpus] [--show_free_gpus] [--num_free_gpus] [--auto_server] \n" \
              "                        [--kill] [--sync directory] [--sync_dest directory] [--exclude pattern1:pattern2:...] \n"
     usage += "       task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] \n" \
              "                           [--count_running] [--last_queue_id] [--gpus num] [--gpu_indices gpu_id1,gpu_id2,...] [--full_cmd job_id] \n" \
@@ -46,6 +46,7 @@ class Argument:
         parser.add_argument('--host', '-H', metavar='host_num', type=int, default=0,
                             help='host to select. Value corresponds to the order '
                                  'specified in the \".servers_ports\" file.')
+        parser.add_argument('--show_gpus', action='store_true', help='show all GPUs info.')
         parser.add_argument('--show_free_gpus', action='store_true', help='show current available GPUs info.')
         parser.add_argument('--num_free_gpus', action='store_true', help='show the number of available GPUs.')
         parser.add_argument('--auto_server', action='store_true', help='auto-magically choose a server based on '

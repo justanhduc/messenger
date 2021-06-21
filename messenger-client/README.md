@@ -36,7 +36,7 @@ The full list of commands is provided below.
 >>> ms -h
 usage: ms [messenger-flags] [task-spooler-flags] [command] 
        messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host host_num] 
-                        [--show_free_gpus] [--num_free_gpus] [--auto_server] 
+                        [--show_gpus] [--show_free_gpus] [--num_free_gpus] [--auto_server] 
                         [--kill] [--sync directory] [--sync_dest directory] 
                         [--excludes pattern1,pattern2,...] 
        task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] 
@@ -58,6 +58,7 @@ optional arguments:
                         set environment variable flags.
   --host host_num, -H host_num
                         host to select. Value corresponds to the order specified in the ".servers_ports" file.
+  --show_gpus           show all GPUs info.
   --show_free_gpus      show current available GPUs info.
   --num_free_gpus       show the number of available GPUs.
   --auto_server         auto-magically choose a server based on the number of available GPUs.
