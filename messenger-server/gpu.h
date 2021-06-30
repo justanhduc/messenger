@@ -8,9 +8,11 @@
 #include <tuple>
 #include <string>
 #include <vector>
+
 #include "utils.h"
 
-#define gpu_info std::vector<std::tuple<int, std::string, double , double>>
+// GPU ID, GPU name, free memory, total memory, and usage percentage
+#define gpu_info std::vector<std::tuple<int, std::string, double , double, double>>
 
 gpu_info queryGPU();
 

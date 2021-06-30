@@ -24,8 +24,9 @@ gpu_info queryGPU() {
         logger.log(WARNING, __FILE__, __LINE__, "Failed to get device count: %s",
                    nvmlErrorString(result));
     for (size_t i = 0; i < nDevices; ++i) {
-        nvmlMemory_t mem;
         nvmlDevice_t dev;
+        nvmlMemory_t mem;
+        nvmlUtilization_st utilization{};
         char name[NVML_DEVICE_NAME_BUFFER_SIZE];
 
         result = nvmlDeviceGetHandleByIndex_v2(i, &dev);
@@ -36,6 +37,7 @@ gpu_info queryGPU() {
             goto Error;
         }
 
+        // query memory
         result = nvmlDeviceGetMemoryInfo(dev, &mem);
         if (result != 0) {
             logger.log(WARNING, __FILE__, __LINE__,
@@ -44,6 +46,16 @@ gpu_info queryGPU() {
             goto Error;
         }
 
+        // utilization
+        result = nvmlDeviceGetUtilizationRates(dev, &utilization);
+        if (result != 0) {
+            logger.log(WARNING, __FILE__, __LINE__,
+                       "Failed to get GPU utilization for GPU %d: %s", i,
+                       nvmlErrorString(result));
+            goto Error;
+        }
+
+        // name
         result = nvmlDeviceGetName(dev, name, NVML_DEVICE_NAME_BUFFER_SIZE);
         if (result != 0) {
             logger.log(WARNING, __FILE__, __LINE__,
@@ -52,7 +64,7 @@ gpu_info queryGPU() {
             goto Error;
         }
 
-        gpuList.emplace_back(i, name, mem.free, mem.total);
+        gpuList.emplace_back(i, name, mem.free, mem.total, utilization.gpu);
     }
     return gpuList;
 
@@ -82,7 +94,7 @@ void showGpuInfo(bool show_free) {
     gpu_info gpuList = queryGPU();
     std::cout << "Device" << std::setw(7) << "Name" << std::setw(35)
             << "Total Memory (GB)" << std::setw(20) << "Free Memory (GB)"
-            << std::endl;
+            << std::setw(20) << "Usage (%)" << std::endl;
     for (auto it : gpuList) {
         auto memfree = std::get<2>(it);
         auto memtotal = std::get<3>(it);
@@ -92,6 +104,7 @@ void showGpuInfo(bool show_free) {
         std::cout << std::get<0>(it) << std::setw(24)
                   << std::get<1>(it) << std::setw(13)
                   << memtotal / (1024. * 1024 * 1024) << std::setw(21)
-                  << memfree / (1024. * 1024 * 1024) << std::endl;
+                  << memfree / (1024. * 1024 * 1024) << std::setw(21)
+                  << std::get<4>(it) << std::endl;
     }
 }
