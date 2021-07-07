@@ -110,7 +110,7 @@ void showGpuInfo(bool show_free) {
     gpu_info gpuList = queryGPU();
     std::cout << std::setw(7) << "Device" << std::setw(25) << "Name"
             << std::setw(20) << "Total Memory (GB)" << std::setw(20) << "Free Memory (GB)"
-            << std::setw(15) << "Usage (%)" << std::endl;
+            << std::setw(18) << "Usage (%)" << std::endl;
     for (auto it : gpuList) {
         auto memfree = std::get<2>(it);
         auto memtotal = std::get<3>(it);
@@ -122,6 +122,6 @@ void showGpuInfo(bool show_free) {
                   << std::setw(25) << std::get<1>(it)
                   << std::setw(20) << memtotal / (1024. * 1024 * 1024)
                   << std::setw(20) << memfree / (1024. * 1024 * 1024)
-                  << std::setw(15) << progBar << std::endl;
+                  << std::setw(18) << progBar << std::endl;
     }
 }
