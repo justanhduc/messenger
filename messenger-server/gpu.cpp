@@ -93,7 +93,7 @@ ints getFreeGpuList() {
 std::string getProgressBar(double percentage) {
     std::string progBar("----------");
     auto perc = (int) round(percentage / 10.);
-    auto num = std::to_string(perc * 10);
+    auto num = std::to_string((int) round(percentage));
     num += "% ";
     if (perc == 0)
         return num + progBar;
