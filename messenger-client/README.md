@@ -18,24 +18,25 @@ make install
 Make a `.servers_ports` in the home directory following the format below
 
 ```
-<host1> <port1>
-<host2> <port2>
+<name1> <host1> <port1>
+<name1> <host2> <port2>
 ...
 ```
+If `-H` or `--host` is not used when calling `ms`, 
 `<host1>` and `<port1>` will be selected by default. 
 Then try execute 
 
 ```
 ms
 ``` 
-The task queue of Task Spooler should appear.
+The task queue of Task Spooler in `<host1>` should appear.
 
 The full list of commands is provided below.
 
 ```
 >>> ms -h
 usage: ms [messenger-flags] [task-spooler-flags] [command] 
-       messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host host_num] 
+       messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host/-H host_name] 
                         [--show_gpus] [--show_free_gpus] [--num_free_gpus] [--auto_server] 
                         [--kill] [--sync directory] [--sync_dest directory] 
                         [--excludes pattern1,pattern2,...] 

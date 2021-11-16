@@ -8,13 +8,13 @@ import random
 import string
 import subprocess
 
-Connection = namedtuple('Connection', ('hosts', 'ports'))
+Connection = namedtuple('Connection', ('host', 'port'))
 tmp_root = '/tmp/messenger-tmp'
 
 
 def get_usage():
     usage = "ms [messenger-flags] [task-spooler-flags] [command] \n"
-    usage += "       messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host host_num] \n" \
+    usage += "       messenger-flags: [--cd directory] [--env FLAG1=VALUE1:FLAG2=VALUE2:...] [--host/-H host_name] \n" \
              "                        [--show_gpus] [--show_free_gpus] [--num_free_gpus] [--auto_server] \n" \
              "                        [--kill] [--sync directory] [--sync_dest directory] [--exclude pattern1:pattern2:...] \n"
     usage += "       task-spooler-flags: [-h] [--set_gpu_wait seconds] [--get_gpu_wait] [--get_label] \n" \
@@ -43,7 +43,7 @@ class Argument:
                             help='change directory. For e.g., ``ms --cd /home/justanhduc/Documents``.')
         parser.add_argument('--env', metavar='FLAG1=VALUE1:FLAG2=VALUE2:...', type=str,
                             help='set environment variable flags.')
-        parser.add_argument('--host', '-H', metavar='host_num', type=int, default=0,
+        parser.add_argument('--host', '-H', metavar='host_name', type=str, default=None,
                             help='host to select. Value corresponds to the order '
                                  'specified in the \".servers_ports\" file.')
         parser.add_argument('--show_gpus', action='store_true', help='show all GPUs info.')
@@ -121,10 +121,10 @@ class MessengerClient:
 
         with open(os.path.join(home, '.servers_ports')) as file:
             reader = csv.reader(file, delimiter=' ')
-            rows = [(host, int(port)) for host, port in reader]
+            rows = [(name, Connection(host, int(port))) for name, host, port in reader]
 
-        rows = list(zip(*rows))
-        self.conn = Connection(rows[0], rows[1])
+        self.default_host = rows[0][0]
+        self.conn = dict(rows)
         self.arg = Argument(argv)
         self.socket = socket.socket()
 
@@ -140,22 +140,21 @@ class MessengerClient:
         else:
             return True
 
-    def choose_server(self):
+    def choose_server(self) -> str:
         cmd = ['ms', '--num_free_gpus']
         num_gpus = 0
-        host_choice = 0
-        for idx, addr in enumerate(zip(self.conn.hosts, self.conn.ports)):
+        host_choice = self.default_host
+        for name, addr in self.conn.items():
             s = socket.socket()
-            s.connect(addr)
+            s.connect((addr.host, addr.port))
             s.send(struct.pack('!i', len(cmd)))
             for i in range(len(cmd)):
                 s.send(struct.pack('!i', len(cmd[i])))
                 s.sendall(cmd[i].encode('utf8'))
 
             num_gpus_ = int(s.recv(1024).decode())
+            host_choice = host_choice if num_gpus > num_gpus_ else name
             num_gpus = max(num_gpus_, num_gpus)
-            num_gpus = num_gpus if num_gpus > num_gpus_ else num_gpus_
-            host_choice = host_choice if num_gpus > num_gpus_ else idx
             s.close()
 
         return host_choice
@@ -186,9 +185,15 @@ class MessengerClient:
         if self.arg.args.auto_server:
             assert self.arg.args.gpus is not None, 'auto_server requires process to run with GPU.'
 
-        choice = self.choose_server() if self.arg.args.auto_server else self.arg.args.host
-        host = self.conn.hosts[choice]
-        port = self.conn.ports[choice]
+        if self.arg.args.auto_server:
+            choice = self.choose_server()
+        elif self.arg.args.host is not None:
+            choice = self.arg.args.host
+        else:
+            choice = self.default_host
+
+        host = self.conn[choice].host
+        port = self.conn[choice].port
         if self.arg.args.sync is not None:
             tmpdir = self.sync(host, self.arg.args.sync_dest)
 
