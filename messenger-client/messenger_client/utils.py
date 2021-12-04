@@ -41,7 +41,7 @@ class Argument:
         parser.add_argument('cmd', metavar='command', type=str, help='job to be run')
         parser.add_argument('--cd', metavar='directory', type=str,
                             help='change directory. For e.g., ``ms --cd /home/justanhduc/Documents``.')
-        parser.add_argument('--env', metavar='FLAG1=VALUE1:FLAG2=VALUE2:...', type=str,
+        parser.add_argument('--env', metavar='\"FLAG1=VALUE1;FLAG2=VALUE2;...\"', type=str,
                             help='set environment variable flags.')
         parser.add_argument('--host', '-H', metavar='host_name', type=str, default=None,
                             help='host to select. Value corresponds to the order '
@@ -167,7 +167,7 @@ class MessengerClient:
             tmpdir = target
 
         if self.arg.args.exclude:
-            excludes = self.arg.args.exclude.split(';')
+            excludes = self.arg.args.exclude.split(':')
             exclude = [f'--exclude={exclude}' for exclude in excludes]
         else:
             exclude = []
