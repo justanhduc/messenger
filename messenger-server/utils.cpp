@@ -26,7 +26,7 @@ void Environment::setEnv() {
 }
 
 void Environment::parseFlag(std::string flag) {
-  strings envs = splitString(std::move(flag), ":");
+  strings envs = splitString(std::move(flag), ";");
   for (auto &it : envs) {
     strings flagsVals = splitString(std::move(it), "=");
     envFlags.push_back(flagsVals[0]);
@@ -75,12 +75,6 @@ int Argument::parseOpts(int argc, strings &argv) {
                  strcmp(longOptions[optionIdx].name, "host") == 0 ||
                  strcmp(longOptions[optionIdx].name, "sync_dest") == 0) {
         cmdIdx += 2;
-      } else if (strcmp(longOptions[optionIdx].name, "num_free_gpus") == 0) {
-        action = COUNT_FREE_GPUS;
-      } else if (strcmp(longOptions[optionIdx].name, "show_free_gpus") == 0) {
-        action = SHOW_FREE_GPUS;
-      } else if (strcmp(longOptions[optionIdx].name, "show_gpus") == 0) {
-          action = SHOW_GPUS;
       } else if (strcmp(longOptions[optionIdx].name, "kill") == 0) {
         action = KILL_SERVER;
       }

@@ -3,7 +3,6 @@
 //
 
 #include "server.h"
-#include "gpu.h"
 
 void MessengerServer::startProcess() {
     strings argv;
@@ -46,28 +45,7 @@ void MessengerServer::startProcess() {
 
     switch (arg.action) {
         case KILL_SERVER:
-            exit(1);
-        case SHOW_FREE_GPUS:
-            dup2(socket_.native_handle(), STDOUT_FILENO);
-            dup2(socket_.native_handle(), STDERR_FILENO);
-            showGpuInfo();
-            socket_.close();
-            break;
-        case SHOW_GPUS:
-            dup2(socket_.native_handle(), STDOUT_FILENO);
-            dup2(socket_.native_handle(), STDERR_FILENO);
-            showGpuInfo(false);
-            socket_.close();
-            break;
-        case COUNT_FREE_GPUS: {
-            auto gpuList = getFreeGpuList();
-            auto numGpus = gpuList.size();
-            dup2(socket_.native_handle(), STDOUT_FILENO);
-            dup2(socket_.native_handle(), STDERR_FILENO);
-            socket_.close();
-            std::cout << numGpus << std::endl;
-            break;
-        }
+            exit(1);  // TODO: kill the server
         case TASK_SPOOLER: {
             auto tsCmd = buildTsCommand(argv, optIdx);
             arg.env.setEnv();

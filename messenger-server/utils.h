@@ -31,7 +31,10 @@ typedef std::vector<int> ints;
 
 extern Logger logger;
 
-enum Actions { SHOW_FREE_GPUS, COUNT_FREE_GPUS, TASK_SPOOLER, KILL_SERVER, SHOW_GPUS };
+enum Actions {
+    TASK_SPOOLER,
+    KILL_SERVER
+};
 
 class Connection {
 public:
@@ -86,9 +89,6 @@ static struct option longOptions[] = {
     {"cd", required_argument, nullptr, 0},
     {"env", required_argument, nullptr, 0},
     {"host", required_argument, nullptr, 'H'},
-    {"show_gpus", no_argument, nullptr, 0},
-    {"show_free_gpus", no_argument, nullptr, 0},
-    {"num_free_gpus", no_argument, nullptr, 0},
     {"auto_server", no_argument, nullptr, 0},
     {"kill", no_argument, nullptr, 0},
     {"sync", required_argument, nullptr, 0},
