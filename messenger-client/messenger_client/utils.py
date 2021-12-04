@@ -167,7 +167,7 @@ class MessengerClient:
             tmpdir = target
 
         if self.arg.args.exclude:
-            excludes = self.arg.args.exclude.split(':')
+            excludes = self.arg.args.exclude.split(';')
             exclude = [f'--exclude={exclude}' for exclude in excludes]
         else:
             exclude = []
