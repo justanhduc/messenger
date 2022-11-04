@@ -45,8 +45,14 @@ class Argument:
                                  'a temp directory before executing the command.')
         parser.add_argument('--sync_dest', metavar='directory', type=str,
                             help='sync destination on the remote server.')
+        parser.add_argument('--include', metavar='pattern1:pattern2:...', type=str, default='',
+                            help='patterns to include when moving files to server.')
         parser.add_argument('--exclude', metavar='pattern1:pattern2:...', type=str, default='',
-                            help='exception patterns when moving files to server.')
+                            help='patterns to exclude when moving files to server.')
+        parser.add_argument('--ln', metavar='directory', type=str,
+                            help='directory to be linked. Must be absolute.')
+        parser.add_argument('--ln_dest', metavar='directory', type=str,
+                            help='destination of the link.')
         self.args, self.cmd = parser.parse_known_intermixed_args(self.argv)
         print('ts '+ ' '.join(self.cmd))
 
@@ -64,39 +70,76 @@ class MessengerClient:
         self.arg = Argument(argv)
         self.socket = socket.socket()
 
-    def sync(self, host, target=None):
+    def sync(self, host):
+        target = self.arg.args.sync_dest
         if target is None:
-            tmpdir = os.path.join(tmp_root, 'tmp-')
+            tmpdir = os.path.join(tmp_root, 'msg-')
             tmpdir += ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
         else:
             tmpdir = target
 
         if self.arg.args.exclude:
             excludes = self.arg.args.exclude.split(':')
-            exclude = [f'--exclude={exclude}' for exclude in excludes]
+            exclude = [f'--exclude={exc}' for exc in excludes]
         else:
             exclude = []
+
+        if self.arg.args.include:
+            includes = self.arg.args.include.split(':')
+            include = [f'--include={inc}' for inc in includes]
+            if not exclude:
+                exclude = ['--exclude=*']
+        else:
+            include = []
 
         syncs = self.arg.args.sync.split(':')
         for to_sync in syncs:
             cmd = ['rsync', '-uar', to_sync]
+            cmd += include
             cmd += exclude
-            cmd += [f'{host}:{tmpdir}/']
+            if host in ('localhost', '127.0.0.1'):
+                cmd += [f'{tmpdir}/']
+            else:
+                cmd += [f'{os.getlogin()}@{host}:{tmpdir}/']
+
             subprocess.call(cmd)  # sync using rsync
 
         return tmpdir
+
+    def create_symlink(self, host, cur_dir=None):
+        target = self.arg.args.ln
+        link = self.arg.args.ln_dest
+        assert os.path.isabs(target), 'Linked directory must be absolute'
+        if not os.path.isabs(link):
+            assert cur_dir is not None or self.arg.args.cd is not None, \
+                'Link is relative, but no destination is specified.' \
+                'Where is it relative to?'
+            dest = cur_dir if cur_dir is not None else self.arg.args.cd
+            link = os.path.join(dest, link)
+
+        if host in ('localhost', '127.0.0.1'):
+            command = f"ln -s {target} {link}"
+        else:
+            command = f"ssh {os.getlogin()}@{host} 'ln -s {target} {link}'"
+
+        subprocess.call(command, shell=True)
 
     def exec(self):
         choice = self.arg.args.host if self.arg.args.host is not None else self.default_host
         host = self.conn[choice].host
         port = self.conn[choice].port
         if self.arg.args.sync is not None:
-            tmpdir = self.sync(host, self.arg.args.sync_dest)
+            tmpdir = self.sync(host)
 
             # change directory to the temp dir
             if self.arg.args.cd is None:
                 self.arg.argv.insert(1, tmpdir)
                 self.arg.argv.insert(1, '--cd')
+        else:
+            tmpdir = None
+
+        if self.arg.args.ln is not None and self.arg.args.ln_dest is not None:
+            self.create_symlink(host, tmpdir)
 
         self.socket.connect((host, port))
         print(f'Connected to {host}:{port}')
