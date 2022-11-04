@@ -49,10 +49,8 @@ class Argument:
                             help='patterns to include when moving files to server.')
         parser.add_argument('--exclude', metavar='pattern1:pattern2:...', type=str, default='',
                             help='patterns to exclude when moving files to server.')
-        parser.add_argument('--ln', metavar='directory', type=str,
-                            help='directory to be linked. Must be absolute.')
-        parser.add_argument('--ln_dest', metavar='directory', type=str,
-                            help='destination of the link.')
+        parser.add_argument('--ln', metavar='target:link,target:link,...', type=str,
+                            help='directories to be linked. Target must be absolute.')
         self.args, self.cmd = parser.parse_known_intermixed_args(self.argv)
         print('ts '+ ' '.join(self.cmd))
 
@@ -107,22 +105,23 @@ class MessengerClient:
         return tmpdir
 
     def create_symlink(self, host, cur_dir=None):
-        target = self.arg.args.ln
-        link = self.arg.args.ln_dest
-        assert os.path.isabs(target), 'Linked directory must be absolute'
-        if not os.path.isabs(link):
-            assert cur_dir is not None or self.arg.args.cd is not None, \
-                'Link is relative, but no destination is specified.' \
-                'Where is it relative to?'
-            dest = cur_dir if cur_dir is not None else self.arg.args.cd
-            link = os.path.join(dest, link)
+        link_pairs = self.arg.args.ln.split(',')
+        for pair in link_pairs:
+            target, link = pair.split(':')
+            assert os.path.isabs(target), 'Linked directory must be absolute'
+            if not os.path.isabs(link):
+                assert cur_dir is not None or self.arg.args.cd is not None, \
+                    'Link is relative, but no destination is specified.' \
+                    'Where is it relative to?'
+                dest = cur_dir if cur_dir is not None else self.arg.args.cd
+                link = os.path.join(dest, link)
 
-        if host in ('localhost', '127.0.0.1'):
-            command = f"ln -s {target} {link}"
-        else:
-            command = f"ssh {os.getlogin()}@{host} 'ln -s {target} {link}'"
+            if host in ('localhost', '127.0.0.1'):
+                command = f"ln -s {target} {link}"
+            else:
+                command = f"ssh {os.getlogin()}@{host} 'ln -s {target} {link}'"
 
-        subprocess.call(command, shell=True)
+            subprocess.call(command, shell=True)
 
     def exec(self):
         choice = self.arg.args.host if self.arg.args.host is not None else self.default_host
@@ -138,7 +137,7 @@ class MessengerClient:
         else:
             tmpdir = None
 
-        if self.arg.args.ln is not None and self.arg.args.ln_dest is not None:
+        if self.arg.args.ln is not None:
             self.create_symlink(host, tmpdir)
 
         self.socket.connect((host, port))

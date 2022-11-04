@@ -96,7 +96,6 @@ static struct option longOptions[] = {
         {"exclude",     required_argument, nullptr, 0},
         {"include",     required_argument, nullptr, 0},
         {"ln",          required_argument, nullptr, 0},
-        {"ln_dest",    required_argument, nullptr, 0},
         {nullptr, 0,                       nullptr, 0}};
 
 cstrings stringsToCstring(strings &);
