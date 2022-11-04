@@ -73,7 +73,10 @@ int Argument::parseOpts(int argc, strings &argv) {
                 } else if (strcmp(longOptions[optionIdx].name, "exclude") == 0 ||
                            strcmp(longOptions[optionIdx].name, "sync") == 0 ||
                            strcmp(longOptions[optionIdx].name, "host") == 0 ||
-                           strcmp(longOptions[optionIdx].name, "sync_dest") == 0) {
+                           strcmp(longOptions[optionIdx].name, "sync_dest") == 0 ||
+                           strcmp(longOptions[optionIdx].name, "include") == 0 ||
+                           strcmp(longOptions[optionIdx].name, "ln") == 0 ||
+                           strcmp(longOptions[optionIdx].name, "ln_dest") == 0) {
                     cmdIdx += 2;
                 } else if (strcmp(longOptions[optionIdx].name, "kill") == 0) {
                     action = KILL_SERVER;
