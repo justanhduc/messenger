@@ -61,7 +61,17 @@ class MessengerClient:
 
         with open(os.path.join(home, '.servers_ports')) as file:
             reader = csv.reader(file, delimiter=' ')
-            rows = [(name, Connection(host, int(port))) for name, host, port in reader]
+            rows = []
+            for info in reader:
+                if len(info) == 3:
+                    name, host, port = info
+                    self.user = os.getlogin()
+                elif len(info) == 4:
+                    name, host, port, self.user = info
+                else:
+                    ValueError(f'Expected a tuple of 3 or 4 values, got {len(info)}')
+
+                rows.append((name, Connection(host, int(port))))
 
         self.default_host = rows[0][0]
         self.conn = dict(rows)
@@ -98,7 +108,7 @@ class MessengerClient:
             if host in ('localhost', '127.0.0.1'):
                 cmd += [f'{tmpdir}/']
             else:
-                cmd += [f'{os.getlogin()}@{host}:{tmpdir}/']
+                cmd += [f'{self.user}@{host}:{tmpdir}/']
 
             subprocess.call(cmd)  # sync using rsync
 
@@ -119,7 +129,7 @@ class MessengerClient:
             if host in ('localhost', '127.0.0.1'):
                 command = f"ln -s {target} {link}"
             else:
-                command = f"ssh {os.getlogin()}@{host} 'ln -s {target} {link}'"
+                command = f"ssh {self.user}@{host} 'ln -s {target} {link}'"
 
             subprocess.call(command, shell=True)
 
