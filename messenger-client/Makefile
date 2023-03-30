@@ -1,3 +1,3 @@
 install:
 	pip uninstall -y messenger
-	python setup.py install
+	which python || python3 setup.py install && python setup.py install
